@@ -9,7 +9,6 @@ import ContactDetail from "./components/ContactDetail";
 import EditContact from "./components/EditContact";
 
 const App = () => {
-  // const LOCAL_STORAGE_KEY = "contacts";
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -21,7 +20,6 @@ const App = () => {
   };
 
   const addContactHandler = async (contact) => {
-    // console.log(contact);
     const request = {
       id: uuidv4(),
       ...contact,
@@ -32,7 +30,6 @@ const App = () => {
 
   const updateContactHandler = async (contact) => {
     const response = await api.put(`/contacts/${contact.id}`, contact);
-    // console.log(response.data);
     let { id } = response.data;
     setContacts(
       contacts.map((contact) => {
@@ -43,15 +40,11 @@ const App = () => {
 
   const removeContactHandler = async (id) => {
     await api.delete(`/contacts/${id}`);
-    // making copy of contacts
-    const newContactList = contacts.filter((contact) => {
-      return contact.id !== id;
-    });
+    const newContactList = contacts.filter((contact) => contact.id !== id);
     setContacts(newContactList);
   };
 
   const searchHandler = (searchTerm) => {
-    // console.log(searchTerm);
     setSearchTerm(searchTerm);
     if (searchTerm !== "") {
       const newContactList = contacts.filter((contact) => {
@@ -67,47 +60,51 @@ const App = () => {
   };
 
   useEffect(() => {
-    // const retrieveContacts = JSON.parse(
-    //   localStorage.getItem(LOCAL_STORAGE_KEY)
-    // );
-    // if (retrieveContacts) setContacts(retrieveContacts);
     const getAllContacts = async () => {
       const allContacts = await retrieveContacts();
       if (allContacts) setContacts(allContacts);
     };
     getAllContacts();
   }, []);
-  useEffect(() => {
-    //localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(contacts));
-  }, [contacts]);
+
   return (
     <div className="ui container">
       <BrowserRouter>
         <Header />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <ContactList
-                contacts={searchTerm.length < 1 ? contacts : searchResults}
-                getContactId={removeContactHandler}
-                term={searchTerm}
-                searchHandler={searchHandler}
-              />
-            }
-          />
-          <Route
-            path="/add"
-            element={<AddContact addContactHandler={addContactHandler} />}
-          />
-          <Route
-            path="/edit"
-            element={
-              <EditContact updateContactHandler={updateContactHandler} />
-            }
-          />
-          <Route path="/contact/:id" element={<ContactDetail />} />
-        </Routes>
+
+        {/* ✅ Responsive Grid Layout */}
+        <div className="ui stackable doubling grid">
+          <div className="row centered">
+            <div className="sixteen wide column">
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <ContactList
+                      contacts={
+                        searchTerm.length < 1 ? contacts : searchResults
+                      }
+                      getContactId={removeContactHandler}
+                      term={searchTerm}
+                      searchHandler={searchHandler}
+                    />
+                  }
+                />
+                <Route
+                  path="/add"
+                  element={<AddContact addContactHandler={addContactHandler} />}
+                />
+                <Route
+                  path="/edit"
+                  element={
+                    <EditContact updateContactHandler={updateContactHandler} />
+                  }
+                />
+                <Route path="/contact/:id" element={<ContactDetail />} />
+              </Routes>
+            </div>
+          </div>
+        </div>
       </BrowserRouter>
     </div>
   );
